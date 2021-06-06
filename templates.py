@@ -4,19 +4,21 @@ def set_template(args):
 
     elif args.template.startswith('train_bert'):
         args.mode = 'train'
-
+        # TODO modify these args when adding a new dataset
         args.dataset_code = 'ml-' + input('Input 1 for ml-1m, 20 for ml-20m: ') + 'm'
         args.min_rating = 0 if args.dataset_code == 'ml-1m' else 4
+        #
         args.min_uc = 5
         args.min_sc = 0
         args.split = 'leave_one_out'
 
         args.dataloader_code = 'bert'
         batch = 128
+        # TODO maybe batch = 256
         args.train_batch_size = batch
         args.val_batch_size = batch
         args.test_batch_size = batch
-
+        # TODO make sure the sampling is done based on popularity
         args.train_negative_sampler_code = 'random'
         args.train_negative_sample_size = 0
         args.train_negative_sampling_seed = 0
@@ -29,12 +31,17 @@ def set_template(args):
         args.num_gpu = 1
         args.device_idx = '0'
         args.optimizer = 'Adam'
+        # TODO maybe args.lr = 0.0001
         args.lr = 0.001
+        # TODO make sure the decay is linear, l2 weight decay of 0.01
+        #  and that gradient clipping is applied if the l2 norm of the
+        #  gradient is greater than 5, and the layers number is 2 and
+        #  the number of heads is also 2
         args.enable_lr_schedule = True
         args.decay_step = 25
         args.gamma = 1.0
         args.num_epochs = 100 if args.dataset_code == 'ml-1m' else 200
-        args.metric_ks = [1, 5, 10, 20, 50, 100]
+        args.metric_ks = [1, 5, 10, 20, 50, 100]  # this is just the intervals to calculate the NDCG on
         args.best_metric = 'NDCG@10'
 
         args.model_code = 'bert'
@@ -42,11 +49,14 @@ def set_template(args):
 
         args.bert_dropout = 0.1
         args.bert_hidden_units = 256
+        # TODO this should be 0.2 args.bert_mask_prob = 0.2
         args.bert_mask_prob = 0.15
         args.bert_max_len = 100
+        # TODO this should be 200 args.bert_max_len = 200
         args.bert_num_blocks = 2
+        # TODO this should be 2 args.bert_num_heads = 4
         args.bert_num_heads = 4
-    
+
     elif args.template.startswith('train_dae'):
         args.mode = 'train'
 
@@ -120,7 +130,7 @@ def set_template(args):
         args.vae_hidden_dim = 600
         args.vae_latent_dim = 200
         args.vae_dropout = 0.5
-    
+
     elif args.template.startswith('train_vae_give_beta'):
         args.mode = 'train'
 
@@ -159,4 +169,3 @@ def set_template(args):
         args.vae_hidden_dim = 600
         args.vae_latent_dim = 200
         args.vae_dropout = 0.5
-
