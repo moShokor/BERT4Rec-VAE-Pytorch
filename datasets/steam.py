@@ -7,15 +7,15 @@ from .base import AbstractDataset
 from .utils import date2timestamp
 
 
-class SteamDataset(AbstractDataset):
+class SteamV1Dataset(AbstractDataset):
     @classmethod
     def code(cls):
-        return 'steam'
+        return 'steamV1'
 
     @classmethod
     def url(cls):
-        return 'http://cseweb.ucsd.edu/~wckang/steam_reviews.json.gz'
-        # return 'http://deepx.ucsd.edu/public/jmcauley/steam/australian_user_reviews.json.gz'
+        # return 'http://cseweb.ucsd.edu/~wckang/steam_reviews.json.gz'
+        return 'http://deepx.ucsd.edu/public/jmcauley/steam/australian_user_reviews.json.gz'
 
     @classmethod
     def zip_file_content_is_folder(cls):
