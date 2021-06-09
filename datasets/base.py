@@ -74,6 +74,8 @@ class AbstractDataset(metaclass=ABCMeta):
             dataset_path.parent.mkdir(parents=True)
         self.maybe_download_raw_dataset()
         df = self.load_ratings_df()
+        # TODO note I added this one to remove duplicates just in case
+        df = df.drop_duplicates(['uid', 'sid'])
         df = self.make_implicit(df)
         df = self.filter_triplets(df)
         df, umap, smap = self.densify_index(df)
