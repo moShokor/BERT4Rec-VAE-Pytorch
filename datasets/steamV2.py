@@ -7,7 +7,7 @@ from .base import AbstractDataset
 from .utils import date2timestamp
 
 
-class SteamV1Dataset(AbstractDataset):
+class SteamV2Dataset(AbstractDataset):
     @classmethod
     def code(cls):
         return 'steamV2'
