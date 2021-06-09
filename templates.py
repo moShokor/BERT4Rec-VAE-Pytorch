@@ -3,9 +3,8 @@ def set_template(args):
         return
     elif args.template.startswith('train_bert_short'):
         args.mode = 'train'
-        args.dataset_code = 'ml-' + input('Input 1 for ml-1m, 20 for ml-20m: ') + 'm'
-        args.min_rating = 0 if args.dataset_code == 'ml-1m' else 4
-        #
+        args.dataset_code = input('Input ml-1 for ml-1m, ml-20 for ml-20m, steam for steam: ')
+        args.min_rating = 4 if args.dataset_code == 'ml-20m' else 0
         args.min_uc = 5
         args.min_sc = 0
         args.split = 'leave_one_out'

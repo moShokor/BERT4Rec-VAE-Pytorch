@@ -1,3 +1,8 @@
+import datetime
+import gzip
+import shutil
+import time
+
 import wget
 import numpy as np
 import pandas as pd
@@ -16,6 +21,12 @@ def unzip(zippath, savepath):
     zip = zipfile.ZipFile(zippath)
     zip.extractall(savepath)
     zip.close()
+
+
+def ungzip(zippath, savepath):
+    with gzip.open(zippath, 'rb') as f_in:
+        with open(savepath, 'wb') as f_out:
+            shutil.copyfileobj(f_in, f_out)
 
 
 def get_count(tp, id):
@@ -40,3 +51,6 @@ def filter_triplets(tp, min_uc=5, min_sc=0):
     usercount, itemcount = get_count(tp, 'userId'), get_count(tp, 'movieId')
     return tp, usercount, itemcount
 
+
+def date2timestamp(date_string, date_format="%B %d, %Y."):
+    return time.mktime(datetime.datetime.strptime(date_string, date_format).timetuple())

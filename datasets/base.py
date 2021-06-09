@@ -4,6 +4,7 @@ from config import RAW_DATASET_ROOT_FOLDER
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+
 tqdm.pandas()
 
 from abc import *
@@ -41,6 +42,10 @@ class AbstractDataset(metaclass=ABCMeta):
     @classmethod
     def is_zipfile(cls):
         return True
+
+    @classmethod
+    def is_gzipfile(cls):
+        return False
 
     @classmethod
     def zip_file_content_is_folder(cls):
@@ -83,8 +88,8 @@ class AbstractDataset(metaclass=ABCMeta):
 
     def maybe_download_raw_dataset(self):
         folder_path = self._get_rawdata_folder_path()
-        if folder_path.is_dir() and\
-           all(folder_path.joinpath(filename).is_file() for filename in self.all_raw_file_names()):
+        if folder_path.is_dir() and \
+                all(folder_path.joinpath(filename).is_file() for filename in self.all_raw_file_names()):
             print('Raw data already exists. Skip downloading')
             return
         print("Raw file doesn't exist. Downloading...")
@@ -93,7 +98,10 @@ class AbstractDataset(metaclass=ABCMeta):
             tmpzip = tmproot.joinpath('file.zip')
             tmpfolder = tmproot.joinpath('folder')
             download(self.url(), tmpzip)
-            unzip(tmpzip, tmpfolder)
+            if self.is_gzipfile():
+                ungzip(tmpzip, tmpfolder)
+            else:
+                unzip(tmpzip, tmpfolder)
             if self.zip_file_content_is_folder():
                 tmpfolder = tmpfolder.joinpath(os.listdir(tmpfolder)[0])
             shutil.move(tmpfolder, folder_path)
@@ -132,6 +140,7 @@ class AbstractDataset(metaclass=ABCMeta):
         print('Densifying index')
         umap = {u: i for i, u in enumerate(set(df['uid']))}
         smap = {s: i for i, s in enumerate(set(df['sid']))}
+        # TODO maybe add other columns to the df to keep the original names of sid
         df['uid'] = df['uid'].map(umap)
         df['sid'] = df['sid'].map(smap)
         return df, umap, smap
@@ -153,19 +162,19 @@ class AbstractDataset(metaclass=ABCMeta):
 
             # Generate user indices
             permuted_index = np.random.permutation(user_count)
-            train_user_index = permuted_index[                :-2*eval_set_size]
-            val_user_index   = permuted_index[-2*eval_set_size:  -eval_set_size]
-            test_user_index  = permuted_index[  -eval_set_size:                ]
+            train_user_index = permuted_index[:-2 * eval_set_size]
+            val_user_index = permuted_index[-2 * eval_set_size:  -eval_set_size]
+            test_user_index = permuted_index[-eval_set_size:]
 
             # Split DataFrames
             train_df = df.loc[df['uid'].isin(train_user_index)]
-            val_df   = df.loc[df['uid'].isin(val_user_index)]
-            test_df  = df.loc[df['uid'].isin(test_user_index)]
+            val_df = df.loc[df['uid'].isin(val_user_index)]
+            test_df = df.loc[df['uid'].isin(test_user_index)]
 
             # DataFrame to dict => {uid : list of sid's}
             train = dict(train_df.groupby('uid').progress_apply(lambda d: list(d['sid'])))
-            val   = dict(val_df.groupby('uid').progress_apply(lambda d: list(d['sid'])))
-            test  = dict(test_df.groupby('uid').progress_apply(lambda d: list(d['sid'])))
+            val = dict(val_df.groupby('uid').progress_apply(lambda d: list(d['sid'])))
+            test = dict(test_df.groupby('uid').progress_apply(lambda d: list(d['sid'])))
             return train, val, test
         else:
             raise NotImplementedError
@@ -190,4 +199,3 @@ class AbstractDataset(metaclass=ABCMeta):
     def _get_preprocessed_dataset_path(self):
         folder = self._get_preprocessed_folder_path()
         return folder.joinpath('dataset.pkl')
-
