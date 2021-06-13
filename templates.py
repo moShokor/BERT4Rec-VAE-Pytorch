@@ -21,6 +21,7 @@ def set_template(args):
 
 
 def baseline_template(args):
+    print('Howdy')
     args.mode = 'train'
     # TODO modify these args when adding a new dataset
     args.dataset_code = input('Input dataset (ml-1m, ml-20m, steamV1, steamV2) ')
@@ -78,6 +79,13 @@ def short_training_template(args):
     baseline_template(args)
     args.num_epochs = 10
     args.bert_hidden_units = 10
+
+
+def wiki2vec_training_template(args):
+    baseline_template(args)
+    args.additional_inputs = ['wiki2vec']
+    args.wiki2vec_dimension = input('Input wiki2vec dimension (100,300,500) ')
+    args.wiki2vec_model_type = input('Input wiki2vec dimension (NA, nolg_, win10_) ')
 
 
 def vae_given_beta_template(args):

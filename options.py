@@ -38,7 +38,7 @@ parser.add_argument('--additional_inputs', type=list, default=[],
 parser.add_argument('--wiki2vec_dimension', type=int, default=100, choices=[100, 300, 500],
                     help='The dimension of the wiki2vec model only relevant when wiki2vec in'
                          ' additional_inputs')
-parser.add_argument('--wiki2vec_model_type', type=str, default='', choices=['', 'nolg_', 'win10_'],
+parser.add_argument('--wiki2vec_model_type', type=str, default='NA', choices=['NA', 'nolg_', 'win10_'],
                     help='The type of wiki2vec model empty means default, nolg_ means no link graph'
                          'and win10_ means a larger window of 10 words')
 

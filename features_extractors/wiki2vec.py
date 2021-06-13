@@ -10,6 +10,7 @@ class Wiki2VecExtractor(AbstractExtractor):
     def __init__(self, args):
         self.dimension = args.wiki2vec_dimension
         self.type = args.wiki2vec_model_type
+        self.type = '' if self.type == 'NA' else self.type
         super().__init__(args)
 
     def load_model(self, args):
