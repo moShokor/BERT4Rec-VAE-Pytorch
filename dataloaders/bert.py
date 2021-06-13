@@ -4,6 +4,8 @@ from .negative_samplers import negative_sampler_factory
 import torch
 import torch.utils.data as data_utils
 
+CLOZE_MASK_TOKEN = -1
+
 
 class BertDataloader(AbstractDataloader):
     def __init__(self, args, dataset):
@@ -11,7 +13,7 @@ class BertDataloader(AbstractDataloader):
         args.num_items = len(self.smap)
         self.max_len = args.bert_max_len
         self.mask_prob = args.bert_mask_prob
-        self.CLOZE_MASK_TOKEN = self.item_count + 1
+        # self.CLOZE_MASK_TOKEN = self.item_count + 1
 
         code = args.train_negative_sampler_code
         train_negative_sampler = negative_sampler_factory(code, self.train, self.val, self.test,
@@ -37,6 +39,9 @@ class BertDataloader(AbstractDataloader):
         train_loader = self._get_train_loader()
         val_loader = self._get_val_loader()
         test_loader = self._get_test_loader()
+        # TODO add additional loaders here for the additional inputs and maybe subclass the
+        # bert dataset to help with handling the inputs being a dictionary and the outputs
+        # negative sampling, you might aslo want to subclass the bertEvalDataset
         return train_loader, val_loader, test_loader
 
     def _get_train_loader(self):
@@ -46,7 +51,13 @@ class BertDataloader(AbstractDataloader):
         return dataloader
 
     def _get_train_dataset(self):
-        dataset = BertTrainDataset(self.train, self.max_len, self.mask_prob, self.CLOZE_MASK_TOKEN, self.item_count, self.rng)
+        if self.has_additional:
+            dataset = BertTrainMultiDataset(self.addmap, self.train, self.max_len, self.mask_prob, CLOZE_MASK_TOKEN,
+                                            self.item_count,
+                                            self.rng)
+        else:
+            dataset = BertTrainDataset(self.train, self.max_len, self.mask_prob, CLOZE_MASK_TOKEN, self.item_count,
+                                       self.rng)
         return dataset
 
     def _get_val_loader(self):
@@ -64,7 +75,11 @@ class BertDataloader(AbstractDataloader):
 
     def _get_eval_dataset(self, mode):
         answers = self.val if mode == 'val' else self.test
-        dataset = BertEvalDataset(self.train, answers, self.max_len, self.CLOZE_MASK_TOKEN, self.test_negative_samples)
+        if self.has_additional:
+            dataset = BertEvalMultiDataset(self.addmap, self.train, answers, self.max_len, CLOZE_MASK_TOKEN,
+                                           self.test_negative_samples)
+        else:
+            dataset = BertEvalDataset(self.train, answers, self.max_len, CLOZE_MASK_TOKEN, self.test_negative_samples)
         return dataset
 
 
@@ -118,7 +133,6 @@ class BertTrainDataset(data_utils.Dataset):
         return self.u2seq[user]
 
 
-
 class BertEvalDataset(data_utils.Dataset):
     def __init__(self, u2seq, u2answer, max_len, mask_token, negative_samples):
         self.u2seq = u2seq
@@ -147,3 +161,30 @@ class BertEvalDataset(data_utils.Dataset):
 
         return torch.LongTensor(seq), torch.LongTensor(candidates), torch.LongTensor(labels)
 
+
+def map_item(index, feature_map):
+    return index if index in {0, CLOZE_MASK_TOKEN} else feature_map[index]
+
+
+class BertTrainMultiDataset(BertTrainDataset):
+    def __init__(self, addmap, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.addmap = addmap
+
+    def __getitem__(self, index):
+        tokens, labels = super(BertTrainMultiDataset, self).__getitem__(index)
+        additional_inputs = {feature: tokens.apply_(lambda el: map_item(el, feature_map))
+                             for feature, feature_map in self.addmap.items()}
+        return tokens, labels, additional_inputs
+
+
+class BertEvalMultiDataset(BertEvalDataset):
+    def __init__(self, addmap, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.addmap = addmap
+
+    def __getitem__(self, index):
+        tokens, candidates, labels = super(BertEvalMultiDataset, self).__getitem__(index)
+        additional_inputs = {feature: tokens.apply_(lambda el: map_item(el, feature_map))
+                             for feature, feature_map in self.addmap.items()}
+        return tokens, candidates, labels, additional_inputs

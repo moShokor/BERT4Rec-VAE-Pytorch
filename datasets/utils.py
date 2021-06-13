@@ -1,16 +1,11 @@
+import bz2
 import datetime
 import gzip
 import shutil
 import time
+import zipfile
 
 import wget
-import numpy as np
-import pandas as pd
-from tqdm import tqdm
-
-from pathlib import Path
-import zipfile
-import sys
 
 
 def download(url, savepath):
@@ -21,6 +16,12 @@ def unzip(zippath, savepath):
     zip = zipfile.ZipFile(zippath)
     zip.extractall(savepath)
     zip.close()
+
+
+def unbz(zippath, savepath):
+    zipfile = bz2.BZ2File(zippath)  # open the file
+    data = zipfile.read()  # get the decompressed data
+    open(savepath, 'wb').write(data)  # write a uncompressed file
 
 
 def ungzip(zippath, savepath):

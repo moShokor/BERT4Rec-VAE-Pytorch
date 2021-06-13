@@ -1,6 +1,6 @@
 from .ml_1m import ML1MDataset
 from .ml_20m import ML20MDataset
-from .steam import SteamV1Dataset
+from .steamV1 import SteamV1Dataset
 from .steamV2 import SteamV2Dataset
 
 DATASETS = {

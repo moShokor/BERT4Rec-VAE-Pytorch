@@ -1,27 +1,27 @@
-from .utils import *
-from config import RAW_DATASET_ROOT_FOLDER
+from collections import defaultdict
 
 import numpy as np
-import pandas as pd
 from tqdm import tqdm
+
+from config import RAW_DATASET_ROOT_FOLDER
+from features_extractors import extractors_factory
+from .downloadable import Downloadable
 
 tqdm.pandas()
 
 from abc import *
 from pathlib import Path
-import os
-import tempfile
-import shutil
 import pickle
 
 
-class AbstractDataset(metaclass=ABCMeta):
+class AbstractDataset(Downloadable, metaclass=ABCMeta):
     def __init__(self, args):
         self.args = args
         self.min_rating = args.min_rating
         self.min_uc = args.min_uc
         self.min_sc = args.min_sc
         self.split = args.split
+        self.additional_inputs_extractors = extractors_factory(args)
 
         assert self.min_uc >= 2, 'Need at least 2 ratings per user for validation and test'
 
@@ -34,29 +34,16 @@ class AbstractDataset(metaclass=ABCMeta):
     def raw_code(cls):
         return cls.code()
 
-    @classmethod
-    @abstractmethod
-    def url(cls):
-        pass
-
-    @classmethod
-    def is_zipfile(cls):
-        return True
-
-    @classmethod
-    def is_gzipfile(cls):
-        return False
-
-    @classmethod
-    def zip_file_content_is_folder(cls):
-        return True
-
-    @classmethod
-    def all_raw_file_names(cls):
-        return []
+    def maybe_download_raw_asset(self):
+        print(f'fetching the {self.code()} dataset ')
+        super(AbstractDataset, self).maybe_download_raw_asset()
 
     @abstractmethod
     def load_ratings_df(self):
+        pass
+
+    @abstractmethod
+    def get_sid2name(self):
         pass
 
     def load_dataset(self):
@@ -72,51 +59,38 @@ class AbstractDataset(metaclass=ABCMeta):
             return
         if not dataset_path.parent.is_dir():
             dataset_path.parent.mkdir(parents=True)
-        self.maybe_download_raw_dataset()
+        self.maybe_download_raw_asset()
         df = self.load_ratings_df()
+        sid2name = self.get_sid2name()
         # TODO note I added this one to remove duplicates just in case
         df = df.drop_duplicates(['uid', 'sid'])
         df = self.make_implicit(df)
         df = self.filter_triplets(df)
         df, umap, smap = self.densify_index(df)
+        # TODO you need to use the smap to correct the coresspondance in the rest of the code
+        addmap = self.index_additional_inputs(sid2name, smap)
+        # train, val, test, train_add, val_add, test_add = self.split_df(df, len(umap))
         train, val, test = self.split_df(df, len(umap))
         dataset = {'train': train,
                    'val': val,
                    'test': test,
+                   # 'train_add': train_add,
+                   # 'val_add': val_add,
+                   # 'test_add': test_add,
                    'umap': umap,
-                   'smap': smap}
+                   'smap': smap,
+                   'addmap': addmap}
         with dataset_path.open('wb') as f:
             pickle.dump(dataset, f)
 
-    def maybe_download_raw_dataset(self):
-        folder_path = self._get_rawdata_folder_path()
-        if folder_path.is_dir() and \
-                all(folder_path.joinpath(filename).is_file() for filename in self.all_raw_file_names()):
-            print('Raw data already exists. Skip downloading')
-            return
-        print("Raw file doesn't exist. Downloading...")
-        if self.is_zipfile():
-            tmproot = Path(tempfile.mkdtemp())
-            tmpzip = tmproot.joinpath('file.zip')
-            tmpfolder = tmproot.joinpath('folder')
-            download(self.url(), tmpzip)
-            if self.is_gzipfile():
-                ungzip(tmpzip, tmpfolder)
-            else:
-                unzip(tmpzip, tmpfolder)
-            if self.zip_file_content_is_folder():
-                tmpfolder = tmpfolder.joinpath(os.listdir(tmpfolder)[0])
-            shutil.move(tmpfolder, folder_path)
-            shutil.rmtree(tmproot)
-            print()
-        else:
-            tmproot = Path(tempfile.mkdtemp())
-            tmpfile = tmproot.joinpath('file')
-            download(self.url(), tmpfile)
-            folder_path.mkdir(parents=True)
-            shutil.move(tmpfile, folder_path.joinpath('ratings.csv'))
-            shutil.rmtree(tmproot)
-            print()
+    def index_additional_inputs(self, sid2name, smap):
+        # translate the ids to correspond to the incremental ones in the smap
+        sid2name = {smap[sid]: name for sid, name in sid2name.items()}
+        # then use the sid2name to get the correspondence from each of the extractors
+        sid2add = defaultdict(dict)
+        for code, extractor in self.additional_inputs_extractors.items():
+            sid2add[code] = extractor.build_correspondence(sid2name)
+        return sid2add
 
     def make_implicit(self, df):
         print('Turning into implicit ratings')
@@ -152,10 +126,17 @@ class AbstractDataset(metaclass=ABCMeta):
             print('Splitting')
             user_group = df.groupby('uid')
             user2items = user_group.progress_apply(lambda d: list(d.sort_values(by='timestamp')['sid']))
-            train, val, test = {}, {}, {}
+            # additional_inputs = user_group.progress_apply(lambda d:
+            #                                               {key: list(d.sort_values(by='timestamp')[key])
+            #                                                for key in self.additional_inputs_names()})
+            train, val, test, train_add, val_add, test_add = {}, {}, {}, {}, {}, {}
             for user in range(user_count):
                 items = user2items[user]
                 train[user], val[user], test[user] = items[:-2], items[-2:-1], items[-1:]
+                #     TODO maybe add these if the additional inputs doesn't have a coresspondence
+                # items_add = additional_inputs[user]
+                # train_add[user], val_add[user], test_add[user] = items_add[:-2], items_add[-2:-1], items_add[-1:]
+            # return train, val, test, train_add, val_add, test_add
             return train, val, test
         elif self.args.split == 'holdout':
             print('Splitting')
@@ -174,6 +155,8 @@ class AbstractDataset(metaclass=ABCMeta):
             test_df = df.loc[df['uid'].isin(test_user_index)]
 
             # DataFrame to dict => {uid : list of sid's}
+            # TODO modify the holdout case similar to the leave one out to include the
+            #  wiki-id
             train = dict(train_df.groupby('uid').progress_apply(lambda d: list(d['sid'])))
             val = dict(val_df.groupby('uid').progress_apply(lambda d: list(d['sid'])))
             test = dict(test_df.groupby('uid').progress_apply(lambda d: list(d['sid'])))
@@ -181,15 +164,15 @@ class AbstractDataset(metaclass=ABCMeta):
         else:
             raise NotImplementedError
 
-    def _get_rawdata_root_path(self):
+    def get_raw_asset_root_path(self):
         return Path(RAW_DATASET_ROOT_FOLDER)
 
     def _get_rawdata_folder_path(self):
-        root = self._get_rawdata_root_path()
+        root = self.get_raw_asset_root_path()
         return root.joinpath(self.raw_code())
 
     def _get_preprocessed_root_path(self):
-        root = self._get_rawdata_root_path()
+        root = self.get_raw_asset_root_path()
         return root.joinpath('preprocessed')
 
     def _get_preprocessed_folder_path(self):

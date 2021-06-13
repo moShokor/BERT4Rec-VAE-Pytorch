@@ -1,28 +1,33 @@
 import ast
 
 import pandas as pd
-from tqdm import tqdm
 
 from .base import AbstractDataset
+from .steam_meta import SteamMetaDataset
 from .utils import date2timestamp
+from .downloadable import Extension
 
 
 class SteamV2Dataset(AbstractDataset):
+
+    def __init__(self, args):
+        super().__init__(args)
+        self.meta_data = SteamMetaDataset(args)
+
     @classmethod
     def code(cls):
         return 'steamV2'
 
-    @classmethod
-    def url(cls):
+    def url(self):
         return 'http://cseweb.ucsd.edu/~wckang/steam_reviews.json.gz'
 
     @classmethod
-    def zip_file_content_is_folder(cls):
+    def compressed_file_content_is_folder(cls):
         return False
 
     @classmethod
-    def is_gzipfile(cls):
-        return True
+    def extension(cls):
+        return Extension.GZIP
 
     @classmethod
     def all_raw_file_names(cls):
@@ -51,3 +56,6 @@ class SteamV2Dataset(AbstractDataset):
             f' ({skipped_reviews / (skipped_reviews + len(results))})')
         df = pd.DataFrame(results)
         return df
+
+    def get_sid2name(self):
+        self.meta_data.get_sid2name()
