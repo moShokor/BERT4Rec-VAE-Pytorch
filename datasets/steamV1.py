@@ -35,7 +35,7 @@ class SteamV1Dataset(AbstractDataset):
         return ['steam_new.json']
 
     def load_ratings_df(self):
-        file_path = self._get_rawdata_folder_path()
+        file_path = self.get_raw_asset_folder_path()
         with open(file_path) as f:
             lines = f.readlines()
         results = []

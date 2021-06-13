@@ -24,13 +24,14 @@ def baseline_template(args):
     print('Howdy')
     args.mode = 'train'
     # TODO modify these args when adding a new dataset
-    args.dataset_code = input('Input dataset (ml-1m, ml-20m, steamV1, steamV2) ')
+    # args.dataset_code = input('Input dataset (ml-1m, ml-20m, steamV1, steamV2) ')
+    args.dataset_code = 'ml-1m'
     args.min_rating = 4 if args.dataset_code == 'ml-20m' else 0
     #
     args.min_uc = 5
     args.min_sc = 0
     args.split = 'leave_one_out'
-    args.experiment_dir = 'gdrive/MyDrive/collab_experiments/'
+    # args.experiment_dir = 'gdrive/MyDrive/collab_experiments/'
     args.dataloader_code = 'bert'
     batch = 128
     # TODO maybe batch = 256

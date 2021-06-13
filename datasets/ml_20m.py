@@ -26,14 +26,14 @@ class ML20MDataset(AbstractDataset):
                 'tags.csv']
 
     def load_ratings_df(self):
-        folder_path = self._get_rawdata_folder_path()
+        folder_path = self.get_raw_asset_folder_path()
         file_path = folder_path.joinpath('ratings.csv')
         df = pd.read_csv(file_path)
         df.columns = ['uid', 'sid', 'rating', 'timestamp']
         return df
 
     def get_sid2name(self):
-        folder_path = self._get_rawdata_folder_path()
+        folder_path = self.get_raw_asset_folder_path()
         file_path = folder_path.joinpath('movies.csv')
         df = pd.read_csv(file_path)
         df.columns = ['sid', 'name', 'tags']

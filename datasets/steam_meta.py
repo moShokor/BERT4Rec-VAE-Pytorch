@@ -33,7 +33,7 @@ class SteamMetaDataset(AbstractDataset):
     def get_sid2name(self):
         # TODO we might also want to include further information about the meta data like
         # the puplisher or the tags
-        file_path = self._get_rawdata_folder_path()
+        file_path = self.get_raw_asset_folder_path()
         with open(file_path) as f:
             lines = f.readlines()
         sid2name = {}

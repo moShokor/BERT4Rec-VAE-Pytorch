@@ -5,6 +5,11 @@ from abc import ABCMeta, abstractmethod
 from enum import Enum
 from pathlib import Path
 
+from tqdm import tqdm
+
+from config import RAW_DATASET_ROOT_FOLDER
+
+tqdm.pandas()
 from datasets.utils import ungzip, download, unzip, unbz
 
 
@@ -44,13 +49,24 @@ class Downloadable(metaclass=ABCMeta):
     def all_raw_file_names(cls):
         return []
 
+    def get_raw_asset_root_path(self):
+        return Path(RAW_DATASET_ROOT_FOLDER)
+
+    def get_raw_asset_folder_path(self):
+        root = self.get_raw_asset_root_path()
+        return root.joinpath(self.raw_code())
+
+    @classmethod
+    def raw_code(cls):
+        return cls.code()
+
     @classmethod
     @abstractmethod
-    def get_raw_asset_root_path(cls):
+    def code(cls):
         pass
 
     def maybe_download_raw_asset(self):
-        folder_path = self.get_raw_asset_root_path()
+        folder_path = self.get_raw_asset_folder_path()
         if folder_path.is_dir() and all(
                 folder_path.joinpath(filename).is_file() for filename in self.all_raw_file_names()):
             print('asset already exists. Skip downloading')

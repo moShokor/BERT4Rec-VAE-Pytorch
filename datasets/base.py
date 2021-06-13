@@ -25,15 +25,6 @@ class AbstractDataset(Downloadable, metaclass=ABCMeta):
 
         assert self.min_uc >= 2, 'Need at least 2 ratings per user for validation and test'
 
-    @classmethod
-    @abstractmethod
-    def code(cls):
-        pass
-
-    @classmethod
-    def raw_code(cls):
-        return cls.code()
-
     def maybe_download_raw_asset(self):
         print(f'fetching the {self.code()} dataset ')
         super(AbstractDataset, self).maybe_download_raw_asset()
@@ -85,7 +76,7 @@ class AbstractDataset(Downloadable, metaclass=ABCMeta):
 
     def index_additional_inputs(self, sid2name, smap):
         # translate the ids to correspond to the incremental ones in the smap
-        sid2name = {smap[sid]: name for sid, name in sid2name.items()}
+        sid2name = {smap.get(sid, sid): name for sid, name in sid2name.items()}
         # then use the sid2name to get the correspondence from each of the extractors
         sid2add = defaultdict(dict)
         for code, extractor in self.additional_inputs_extractors.items():
@@ -163,13 +154,6 @@ class AbstractDataset(Downloadable, metaclass=ABCMeta):
             return train, val, test
         else:
             raise NotImplementedError
-
-    def get_raw_asset_root_path(self):
-        return Path(RAW_DATASET_ROOT_FOLDER)
-
-    def _get_rawdata_folder_path(self):
-        root = self.get_raw_asset_root_path()
-        return root.joinpath(self.raw_code())
 
     def _get_preprocessed_root_path(self):
         root = self.get_raw_asset_root_path()
