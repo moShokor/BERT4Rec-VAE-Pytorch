@@ -11,6 +11,6 @@ DATASETS = {
 }
 
 
-def dataset_factory(args):
+def dataset_factory(args, extractors):
     dataset = DATASETS[args.dataset_code]
-    return dataset(args)
+    return dataset(args, extractors)

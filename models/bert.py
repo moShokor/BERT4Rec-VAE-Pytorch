@@ -5,15 +5,15 @@ import torch.nn as nn
 
 
 class BERTModel(BaseModel):
-    def __init__(self, args):
-        super().__init__(args)
-        self.bert = BERT(args)
+    def __init__(self, args, extractors):
+        super().__init__(args, extractors)
+        self.bert = BERT(args, extractors)
         self.out = nn.Linear(self.bert.hidden, args.num_items + 1)
 
     @classmethod
     def code(cls):
         return 'bert'
 
-    def forward(self, x):
-        x = self.bert(x)
+    def forward(self, x, additional):
+        x = self.bert(x, additional)
         return self.out(x)

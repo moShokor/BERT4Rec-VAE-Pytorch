@@ -10,9 +10,8 @@ class AbstractExtractor(Downloadable, metaclass=ABCMeta):
         self.maybe_download_raw_asset()
         self.model, self.zeroth_index = self.load_model(args)
 
-    @classmethod
     @abstractmethod
-    def code(cls):
+    def embedding_size(self):
         pass
 
     @abstractmethod
@@ -35,7 +34,7 @@ class AbstractExtractor(Downloadable, metaclass=ABCMeta):
         """
         pass
 
-    def get_raw_asset_root_path(cls):
+    def get_raw_asset_root_path(self):
         return Path(RAW_EXTRACTOR_ROOT_FOLDER)
 
     def maybe_download_raw_asset(self):

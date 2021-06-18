@@ -3,12 +3,11 @@ import random
 
 
 class AbstractDataloader(metaclass=ABCMeta):
-    def __init__(self, args, dataset):
+    def __init__(self, args, dataset, extractors):
         self.args = args
         seed = args.dataloader_random_seed
         self.rng = random.Random(seed)
         self.save_folder = dataset._get_preprocessed_folder_path()
-        self.has_additional = bool(args.additional_inputs)
         dataset = dataset.load_dataset()
         self.train = dataset['train']
         self.val = dataset['val']
@@ -18,6 +17,7 @@ class AbstractDataloader(metaclass=ABCMeta):
         self.addmap = dataset['addmap']
         self.user_count = len(self.umap)
         self.item_count = len(self.smap)
+        self.extractors = extractors
 
     @classmethod
     @abstractmethod

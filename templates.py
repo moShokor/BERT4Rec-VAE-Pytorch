@@ -1,31 +1,11 @@
 # TODO make sure to update the templates using the updated options from options.py
 #  to include the information of the wiki2vec
 
-def set_template(args):
-    if args.template is None:
-        return
-    elif args.template.startswith('train_bert_short'):
-        short_training_template(args)
-
-    elif args.template.startswith('train_bert'):
-        baseline_template(args)
-
-    elif args.template.startswith('train_dae'):
-        dae_template(args)
-
-    elif args.template.startswith('train_vae_search_beta'):
-        vae_search_beta_template(args)
-
-    elif args.template.startswith('train_vae_give_beta'):
-        vae_given_beta_template(args)
-
 
 def baseline_template(args):
-    print('Howdy')
     args.mode = 'train'
     # TODO modify these args when adding a new dataset
-    # args.dataset_code = input('Input dataset (ml-1m, ml-20m, steamV1, steamV2) ')
-    args.dataset_code = 'ml-1m'
+    args.dataset_code = input('Input dataset (ml-1m, ml-20m, steamV1, steamV2) ')
     args.min_rating = 4 if args.dataset_code == 'ml-20m' else 0
     #
     args.min_uc = 5
@@ -73,7 +53,7 @@ def baseline_template(args):
     # TODO this should be 200 args.bert_max_len = 200
     args.bert_num_blocks = 2
     # TODO this should be 2 args.bert_num_heads = 4
-    args.bert_num_heads = 4
+    args.bert_num_heads = 2
 
 
 def short_training_template(args):
@@ -191,3 +171,36 @@ def dae_template(args):
     args.dae_hidden_dim = 600
     args.dae_latent_dim = 200
     args.dae_dropout = 0.5
+
+
+# def set_template(args):
+#     if args.template is None:
+#         return
+#     elif args.template.startswith('train_bert_short'):
+#         short_training_template(args)
+#
+#     elif args.template.startswith('train_bert'):
+#         baseline_template(args)
+#
+#     elif args.template.startswith('train_dae'):
+#         dae_template(args)
+#
+#     elif args.template.startswith('train_vae_search_beta'):
+#         vae_search_beta_template(args)
+#
+#     elif args.template.startswith('train_vae_give_beta'):
+#         vae_given_beta_template(args)
+
+
+TEMPLATES = {'train_bert_short': short_training_template,
+             'train_bert': baseline_template,
+             'train_bert_wiki2vec': wiki2vec_training_template,
+             'train_dae': dae_template,
+             'train_vae_search_beta': vae_search_beta_template,
+             'train_vae_give_beta': vae_given_beta_template,
+             }
+
+
+def set_template(args):
+    if args.template:
+        TEMPLATES[args.template](args)

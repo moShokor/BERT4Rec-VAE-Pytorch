@@ -9,6 +9,6 @@ MODELS = {
 }
 
 
-def model_factory(args):
+def model_factory(args, extractors):
     model = MODELS[args.model_code]
-    return model(args)
+    return model(args, extractors)

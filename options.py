@@ -41,7 +41,9 @@ parser.add_argument('--wiki2vec_dimension', type=int, default=100, choices=[100,
 parser.add_argument('--wiki2vec_model_type', type=str, default='NA', choices=['NA', 'nolg_', 'win10_'],
                     help='The type of wiki2vec model empty means default, nolg_ means no link graph'
                          'and win10_ means a larger window of 10 words')
-
+parser.add_argument('--combination_type', type=str, default='concat', choices=['concat', 'factored', 'sum'],
+                    help='How to combine the features with the BERT embeddings either sum or concat or factored'
+                         ' which does the factored attention method')
 ################
 # Dataloader
 ################

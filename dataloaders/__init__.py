@@ -9,9 +9,8 @@ DATALOADERS = {
 }
 
 
-def dataloader_factory(args):
-    dataset = dataset_factory(args)
+def dataloader_factory(args, dataset, extractors):
     dataloader = DATALOADERS[args.dataloader_code]
-    dataloader = dataloader(args, dataset)
+    dataloader = dataloader(args, dataset, extractors)
     train, val, test = dataloader.get_pytorch_dataloaders()
     return train, val, test

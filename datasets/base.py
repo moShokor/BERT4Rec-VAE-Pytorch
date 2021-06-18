@@ -3,25 +3,22 @@ from collections import defaultdict
 import numpy as np
 from tqdm import tqdm
 
-from config import RAW_DATASET_ROOT_FOLDER
-from features_extractors import extractors_factory
 from .downloadable import Downloadable
 
 tqdm.pandas()
 
 from abc import *
-from pathlib import Path
 import pickle
 
 
 class AbstractDataset(Downloadable, metaclass=ABCMeta):
-    def __init__(self, args):
+    def __init__(self, args, extractors):
         self.args = args
         self.min_rating = args.min_rating
         self.min_uc = args.min_uc
         self.min_sc = args.min_sc
         self.split = args.split
-        self.additional_inputs_extractors = extractors_factory(args)
+        self.additional_inputs_extractors = extractors
 
         assert self.min_uc >= 2, 'Need at least 2 ratings per user for validation and test'
 

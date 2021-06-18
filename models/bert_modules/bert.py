@@ -1,12 +1,14 @@
+import torch
 from torch import nn as nn
 
+from models.bert_modules.combination import combiners_factory
 from models.bert_modules.embedding import BERTEmbedding
 from models.bert_modules.transformer import TransformerBlock
 from utils import fix_random_seed_as
 
 
 class BERT(nn.Module):
-    def __init__(self, args):
+    def __init__(self, args, extractors):
         super().__init__()
 
         fix_random_seed_as(args.model_init_seed)
@@ -24,15 +26,20 @@ class BERT(nn.Module):
         # embedding for BERT, sum of positional, segment, token embeddings
         self.embedding = BERTEmbedding(vocab_size=vocab_size, embed_size=self.hidden, max_len=max_len, dropout=dropout)
 
+        self.combination_layer = combiners_factory(args.combination_type, extractors, self.hidden)
+
         # multi-layers transformer blocks, deep network
         self.transformer_blocks = nn.ModuleList(
             [TransformerBlock(hidden, heads, hidden * 4, dropout) for _ in range(n_layers)])
 
-    def forward(self, x):
+    def forward(self, x, additional):
         mask = (x > 0).unsqueeze(1).repeat(1, x.size(1), 1).unsqueeze(1)
 
         # embedding the indexed sequence to sequence of vectors
         x = self.embedding(x)
+
+        # combining bert's embeddings with the external embeddings
+        x = self.combination_layer(x, additional)
 
         # running over multiple transformer blocks
         for transformer in self.transformer_blocks:
