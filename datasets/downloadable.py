@@ -83,7 +83,7 @@ class Downloadable(metaclass=ABCMeta):
             if self.compressed_file_content_is_folder():
                 tmpfolder = tmpfolder.joinpath(os.listdir(tmpfolder)[0])
             shutil.move(str(tmpfolder), str(folder_path))
-            shutil.rmtree(tmproot)
+            # shutil.rmtree(tmproot)
             print()
         else:
             # TODO check this chunk of code, is it needed
