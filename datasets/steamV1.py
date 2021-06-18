@@ -11,9 +11,9 @@ from .utils import date2timestamp
 
 class SteamV1Dataset(AbstractDataset):
 
-    def __init__(self, args):
-        super().__init__(args)
-        self.meta_data = SteamMetaDataset(args)
+    def __init__(self, args, extractors):
+        super().__init__(args, extractors)
+        self.meta_data = SteamMetaDataset(args, extractors)
 
     @classmethod
     def code(cls):

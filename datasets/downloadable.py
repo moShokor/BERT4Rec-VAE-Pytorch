@@ -7,7 +7,7 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-from config import RAW_DATASET_ROOT_FOLDER
+from config import RAW_DATASET_ROOT_FOLDER, TMP_FOLDER
 
 tqdm.pandas()
 from datasets.utils import ungzip, download, unzip, unbz
@@ -73,7 +73,8 @@ class Downloadable(metaclass=ABCMeta):
             return
         print("asset doesn't exist. Downloading...")
         if self.is_compressed():
-            tmproot = Path(tempfile.mkdtemp())
+            tmproot = Path(TMP_FOLDER)
+            os.mkdir(tmproot)
             tmpzip = tmproot.joinpath('file.zip')
             tmpfolder = tmproot.joinpath('folder')
             download(self.url(), tmpzip)
