@@ -74,7 +74,7 @@ class Downloadable(metaclass=ABCMeta):
         print("asset doesn't exist. Downloading...")
         if self.is_compressed():
             tmproot = Path(TMP_FOLDER)
-            os.mkdir(tmproot)
+            tmproot.mkdir(parents=True, exist_ok=True)
             tmpzip = tmproot.joinpath('file.zip')
             tmpfolder = tmproot.joinpath('folder')
             download(self.url(), tmpzip)
