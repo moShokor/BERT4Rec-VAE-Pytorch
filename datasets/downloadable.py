@@ -67,10 +67,10 @@ class Downloadable(metaclass=ABCMeta):
 
     def maybe_download_raw_asset(self):
         folder_path = self.get_raw_asset_folder_path()
-        if folder_path.is_dir() and all(
-                folder_path.joinpath(filename).is_file() for filename in self.all_raw_file_names()):
-            print('asset already exists. Skip downloading')
-            return
+        # if folder_path.is_dir() and all(
+        #         folder_path.joinpath(filename).is_file() for filename in self.all_raw_file_names()):
+        #     print('asset already exists. Skip downloading')
+        #     return
         print("asset doesn't exist. Downloading...")
         if self.is_compressed():
             tmproot = Path(TMP_FOLDER)
@@ -82,7 +82,7 @@ class Downloadable(metaclass=ABCMeta):
             extractor_functions[self.extension()](tmpzip, tmpfolder)
             if self.compressed_file_content_is_folder():
                 tmpfolder = tmpfolder.joinpath(os.listdir(tmpfolder)[0])
-            shutil.move(tmpfolder, folder_path)
+            shutil.move(str(tmpfolder), str(folder_path))
             shutil.rmtree(tmproot)
             print()
         else:
