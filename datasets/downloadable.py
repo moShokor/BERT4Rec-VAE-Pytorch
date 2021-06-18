@@ -75,6 +75,7 @@ class Downloadable(metaclass=ABCMeta):
         if self.is_compressed():
             tmproot = Path(TMP_FOLDER)
             tmproot.mkdir(parents=True, exist_ok=True)
+            folder_path.mkdir(parents=True, exist_ok=True)
             tmpzip = tmproot.joinpath('file.zip')
             tmpfolder = tmproot.joinpath('folder')
             download(self.url(), tmpzip)
