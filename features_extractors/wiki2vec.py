@@ -66,3 +66,7 @@ class Wiki2VecExtractor(AbstractExtractor):
 
     def get_raw_model_path(self):
         return self.get_raw_asset_folder_path().joinpath(self.model_name())
+
+    @classmethod
+    def compressed_file_content_is_folder(cls):
+        return False
