@@ -67,6 +67,7 @@ def wiki2vec_training_template(args):
     args.additional_inputs = ['wiki2vec']
     args.wiki2vec_dimension = input('Input wiki2vec dimension (100,300,500) ')
     args.wiki2vec_model_type = input('Input wiki2vec dimension (NA, nolg_, win10_) ')
+    args.combination_type = 'concat'
 
 
 def vae_given_beta_template(args):
