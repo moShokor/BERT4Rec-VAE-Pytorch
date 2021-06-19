@@ -78,13 +78,15 @@ class Downloadable(metaclass=ABCMeta):
         if self.is_compressed():
             tmproot = Path(TMP_FOLDER)
             tmproot.mkdir(parents=True, exist_ok=True)
-            folder_path.mkdir(parents=True, exist_ok=True)
             tmpzip = tmproot.joinpath('file.zip')
             tmpfolder = tmproot.joinpath(self.asset_name())
             download(self.url(), tmpzip)
             extractor_functions[self.extension()](tmpzip, tmpfolder)
             if self.compressed_file_content_is_folder():
                 tmpfolder = tmpfolder.joinpath(os.listdir(tmpfolder)[0])
+                folder_path = folder_path.parent
+            if not folder_path.is_dir():
+                folder_path.mkdir(parents=True, exist_ok=True)
             shutil.move(str(tmpfolder), str(folder_path))
             # shutil.rmtree(tmproot)
             print()
