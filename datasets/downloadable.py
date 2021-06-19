@@ -65,19 +65,22 @@ class Downloadable(metaclass=ABCMeta):
     def code(cls):
         pass
 
+    def asset_name(self):
+        return 'folder'
+
     def maybe_download_raw_asset(self):
         folder_path = self.get_raw_asset_folder_path()
-        # if folder_path.is_dir() and all(
-        #         folder_path.joinpath(filename).is_file() for filename in self.all_raw_file_names()):
-        #     print('asset already exists. Skip downloading')
-        #     return
+        if folder_path.is_dir() and all(
+                folder_path.joinpath(filename).is_file() for filename in self.all_raw_file_names()):
+            print('asset already exists. Skip downloading')
+            return
         print("asset doesn't exist. Downloading...")
         if self.is_compressed():
             tmproot = Path(TMP_FOLDER)
             tmproot.mkdir(parents=True, exist_ok=True)
             folder_path.mkdir(parents=True, exist_ok=True)
             tmpzip = tmproot.joinpath('file.zip')
-            tmpfolder = tmproot.joinpath('folder')
+            tmpfolder = tmproot.joinpath(self.asset_name())
             download(self.url(), tmpzip)
             extractor_functions[self.extension()](tmpzip, tmpfolder)
             if self.compressed_file_content_is_folder():
@@ -94,5 +97,5 @@ class Downloadable(metaclass=ABCMeta):
             download(self.url(), tmpfile)
             folder_path.mkdir(parents=True)
             shutil.move(tmpfile, folder_path.joinpath('ratings.csv'))
-            shutil.rmtree(tmproot)
+            # shutil.rmtree(tmproot)
             print()

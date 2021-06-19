@@ -34,7 +34,7 @@ class Wiki2VecExtractor(AbstractExtractor):
 
     def url(self):
         return f'http://wikipedia2vec.s3.amazonaws.com/models/en/2018-04-20/' \
-               f'{self.model_name()}.bz2'
+               f'{self.asset_name()}.bz2'
 
     # TODO maybe merge the methods build_correspondence and embed
     def build_correspondence(self, sid2name):
@@ -61,11 +61,11 @@ class Wiki2VecExtractor(AbstractExtractor):
                                       if el else list(torch.zeros(self.model.syn0.shape[1]))
                                       for el in idx_tensor]))
 
-    def model_name(self):
+    def asset_name(self):
         return f'enwiki_20180420_{self.type}{self.dimension}d.pkl'
 
     def get_raw_model_path(self):
-        return self.get_raw_asset_folder_path().joinpath(self.model_name())
+        return self.get_raw_asset_folder_path().joinpath(self.asset_name())
 
     @classmethod
     def compressed_file_content_is_folder(cls):
