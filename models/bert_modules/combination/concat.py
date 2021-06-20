@@ -12,8 +12,8 @@ class ConcatCombination(CombinationLayer):
 
     def forward(self, x, additional):
         # simply stack the elements first
-        print(f'x: {x.shape}')
-        print(f'a: {additional[0].shape}')
+        # print(f'x: {x.shape}')
+        # print(f'a: {additional[0].shape}')
         res = torch.cat([x] + additional, dim=-1)
         return self.reduction(res)
 
