@@ -47,15 +47,14 @@ class Wiki2VecExtractor(AbstractExtractor):
             for new_name in self.pre_process_name(name):
                 el_id = self.model.dictionary.get_entity(new_name)
                 el_id = el_id if el_id else self.model.dictionary.get_word(new_name)
-                el_id = el_id.index if el_id else self.zeroth_index
-                try:
-                    assert el_id < len(self.s)
-                except:
-                    print(el_id)
-                sid2wiki_id[sid] = el_id
-                if not el_id:
-                    lost += 1
-
+                if el_id:
+                    sid2wiki_id[sid] = el_id.index
+                    break
+            if not sid2wiki_id.get(sid, None):
+                sid2wiki_id[sid] = self.zeroth_index
+                lost += 1
+        # adding the zeroth index for the mask token
+        sid2wiki_id[len(sid2name)]= self.zeroth_index
         total = len(sid2name)
         print(f'when using the {self.code()} feature we could not match {lost} out of {total}'
               f' items ratio: {(lost / total):2f}%')

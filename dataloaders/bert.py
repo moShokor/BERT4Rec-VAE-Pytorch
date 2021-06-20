@@ -164,7 +164,7 @@ class BertEvalDataset(data_utils.Dataset):
 
 
 def map_item(index, feature_map, mask_token, extractor_mask_token):
-    return extractor_mask_token if index in {0, mask_token} else feature_map[index]
+    return extractor_mask_token if index in {0, mask_token} else feature_map.get(index, extractor_mask_token)
 
 
 class BertTrainMultiDataset(BertTrainDataset):

@@ -73,7 +73,7 @@ class AbstractDataset(Downloadable, metaclass=ABCMeta):
 
     def index_additional_inputs(self, sid2name, smap):
         # translate the ids to correspond to the incremental ones in the smap
-        sid2name = {smap.get(sid, sid): name for sid, name in sid2name.items()}
+        sid2name = {smap[sid]: name for sid, name in sid2name.items() if sid in smap}
         # then use the sid2name to get the correspondence from each of the extractors
         sid2add = defaultdict(dict)
         for code, extractor in self.additional_inputs_extractors.items():
