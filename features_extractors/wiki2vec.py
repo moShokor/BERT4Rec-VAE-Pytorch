@@ -23,7 +23,7 @@ class Wiki2VecExtractor(AbstractExtractor):
         self.model = Wikipedia2Vec.load(file_path)
         self.s = self.model.syn0
         self.s = np.concatenate([self.s, np.zeros((1, self.s.shape[-1]))])
-        self.s = torch.from_numpy(self.s)
+        self.s = torch.from_numpy(self.s).float()
         self.zeroth_index = len(self.s) - 1
 
     @classmethod
