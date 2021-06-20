@@ -8,7 +8,7 @@ from datasets.downloadable import Downloadable
 class AbstractExtractor(Downloadable, metaclass=ABCMeta):
     def __init__(self, args):
         self.maybe_download_raw_asset()
-        self.model, self.zeroth_index = self.load_model(args)
+        self.load_model(args)
 
     @abstractmethod
     def embedding_size(self):

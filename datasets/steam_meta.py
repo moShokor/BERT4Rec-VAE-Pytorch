@@ -8,6 +8,10 @@ from .downloadable import Extension
 
 class SteamMetaDataset(AbstractDataset):
 
+    def __init__(self, args, extractors):
+        super().__init__(args, extractors)
+        self.load_dataset()
+
     @classmethod
     def code(cls):
         return 'steamMeta'

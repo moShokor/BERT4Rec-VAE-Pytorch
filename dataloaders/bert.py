@@ -1,4 +1,5 @@
 import copy
+from time import time
 
 from .base import AbstractDataloader
 from .negative_samplers import negative_sampler_factory
@@ -162,8 +163,8 @@ class BertEvalDataset(data_utils.Dataset):
         return torch.LongTensor(seq), torch.LongTensor(candidates), torch.LongTensor(labels)
 
 
-def map_item(index, feature_map, mask_token):
-    return index if index in {0, mask_token} else feature_map[index]
+def map_item(index, feature_map, mask_token, extractor_mask_token):
+    return extractor_mask_token if index in {0, mask_token} else feature_map[index]
 
 
 class BertTrainMultiDataset(BertTrainDataset):
@@ -176,9 +177,10 @@ class BertTrainMultiDataset(BertTrainDataset):
         tokens, labels = super(BertTrainMultiDataset, self).__getitem__(index)
         additional_inputs = []
         for feature, feature_map in self.addmap.items():
+            extractor = self.extractors[feature]
             tensor = copy.deepcopy(tokens)
-            tensor = tokens.apply_(lambda el: map_item(el, feature_map, self.mask_token))
-            additional_inputs.append(self.extractors[feature].embed(tensor))
+            tensor = tensor.apply_(lambda el: map_item(el, feature_map, self.mask_token, extractor.zeroth_index))
+            additional_inputs.append(extractor.embed(tensor))
         results = [tokens, labels] + additional_inputs
         return tuple(results)
 
@@ -188,13 +190,24 @@ class BertEvalMultiDataset(BertEvalDataset):
         super().__init__(*args, **kwargs)
         self.extractors = extractors
         self.addmap = addmap
+        self.a = 0
+        self.b = 0
+        self.c = 0
 
     def __getitem__(self, index):
         tokens, candidates, labels = super(BertEvalMultiDataset, self).__getitem__(index)
+        s = time()
         additional_inputs = []
         for feature, feature_map in self.addmap.items():
+            extractor = self.extractors[feature]
             tensor = copy.deepcopy(tokens)
-            tensor = tensor.apply_(lambda el: map_item(el, feature_map, self.mask_token))
-            additional_inputs.append(self.extractors[feature].embed(tensor))
+            a = time()
+            tensor = tensor.apply_(lambda el: map_item(el, feature_map, self.mask_token, extractor.zeroth_index))
+            b = time()
+            additional_inputs.append(extractor.embed(tensor))
+            c = time()
+            self.a += a - s
+            self.b += b - a
+            self.c += c - b
         results = [tokens, candidates, labels] + additional_inputs
         return tuple(results)

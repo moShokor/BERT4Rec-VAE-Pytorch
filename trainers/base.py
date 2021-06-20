@@ -85,7 +85,7 @@ class AbstractTrainer(metaclass=ABCMeta):
 
         for batch_idx, batch in enumerate(tqdm_dataloader):
             batch_size = batch[0].size(0)
-
+            batch = [x.to(self.device) for x in batch]
 
             self.optimizer.zero_grad()
             loss = self.calculate_loss(batch)

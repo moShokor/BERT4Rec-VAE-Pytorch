@@ -20,9 +20,11 @@ class Wiki2VecExtractor(AbstractExtractor):
 
     def load_model(self, args):
         file_path = self.get_raw_model_path()
-        model = Wikipedia2Vec.load(file_path)
-        zeroth_index = 0
-        return model, zeroth_index
+        self.model = Wikipedia2Vec.load(file_path)
+        self.s = self.model.syn0
+        self.s = np.concatenate([self.s, np.zeros((1, self.s.shape[-1]))])
+        self.s = torch.from_numpy(self.s)
+        self.zeroth_index = len(self.s) - 1
 
     @classmethod
     def code(cls):
@@ -46,7 +48,10 @@ class Wiki2VecExtractor(AbstractExtractor):
                 el_id = self.model.dictionary.get_entity(new_name)
                 el_id = el_id if el_id else self.model.dictionary.get_word(new_name)
                 el_id = el_id.index if el_id else self.zeroth_index
-                assert el_id < len(self.model.syn0)
+                try:
+                    assert el_id < len(self.s)
+                except:
+                    print(el_id)
                 sid2wiki_id[sid] = el_id
                 if not el_id:
                     lost += 1
@@ -57,9 +62,7 @@ class Wiki2VecExtractor(AbstractExtractor):
         return sid2wiki_id
 
     def embed(self, idx_tensor):
-        return torch.tensor(np.array([list(self.model.syn0[el])
-                                      if el else list(torch.zeros(self.model.syn0.shape[1]))
-                                      for el in idx_tensor]))
+        return torch.index_select(self.s, 0, idx_tensor)
 
     def asset_name(self):
         return f'enwiki_20180420_{self.type}{self.dimension}d.pkl'
