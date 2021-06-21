@@ -39,7 +39,7 @@ def baseline_template(args):
     args.enable_lr_schedule = True
     args.decay_step = 25
     args.gamma = 1.0
-    epochs_nums = {'ml-1m': 100, 'ml-20m': 150, 'steamV1': 100, 'steamV2': 150, }
+    epochs_nums = {'ml-1m': 100, 'ml-20m': 100, 'steamV1': 100, 'steamV2': 150, }
     args.num_epochs = epochs_nums[args.dataset_code]
     args.metric_ks = [1, 5, 10, 20, 50, 100]  # this is just the intervals to calculate the NDCG on
     args.best_metric = 'NDCG@10'
