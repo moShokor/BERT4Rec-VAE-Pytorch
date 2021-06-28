@@ -95,7 +95,7 @@ class AbstractTrainer(metaclass=ABCMeta):
 
             average_meter_set.update('loss', loss.item())
             tqdm_dataloader.set_description(
-                'Epoch {}, loss {:.3f} '.format(epoch+1, average_meter_set['loss'].avg))
+                'Epoch {}, loss {:.3f} '.format(epoch + 1, average_meter_set['loss'].avg))
 
             accum_iter += batch_size
 
@@ -103,7 +103,7 @@ class AbstractTrainer(metaclass=ABCMeta):
                 tqdm_dataloader.set_description('Logging to Tensorboard')
                 log_data = {
                     'state_dict': (self._create_state_dict()),
-                    'epoch': epoch+1,
+                    'epoch': epoch + 1,
                     'accum_iter': accum_iter,
                 }
                 log_data.update(average_meter_set.averages())
@@ -126,7 +126,7 @@ class AbstractTrainer(metaclass=ABCMeta):
 
                 for k, v in metrics.items():
                     average_meter_set.update(k, v)
-                description_metrics = ['NDCG@%d' % k for k in self.metric_ks[:3]] +\
+                description_metrics = ['NDCG@%d' % k for k in self.metric_ks[:3]] + \
                                       ['Recall@%d' % k for k in self.metric_ks[:3]]
                 description = 'Val: ' + ', '.join(s + ' {:.3f}' for s in description_metrics)
                 description = description.replace('NDCG', 'N').replace('Recall', 'R')
@@ -135,17 +135,17 @@ class AbstractTrainer(metaclass=ABCMeta):
 
             log_data = {
                 'state_dict': (self._create_state_dict()),
-                'epoch': epoch+1,
+                'epoch': epoch + 1,
                 'accum_iter': accum_iter,
             }
             log_data.update(average_meter_set.averages())
             self.log_extra_val_info(log_data)
             self.logger_service.log_val(log_data)
 
-    def test(self):
+    def test(self, model_path=None):
         print('Test best model with test set!')
-
-        best_model = torch.load(os.path.join(self.export_root, 'models', 'best_acc_model.pth')).get('model_state_dict')
+        model_path = model_path if model_path else os.path.join(self.export_root, 'models', 'best_acc_model.pth')
+        best_model = torch.load(model_path).get('model_state_dict')
         self.model.load_state_dict(best_model)
         self.model.eval()
 
@@ -160,7 +160,7 @@ class AbstractTrainer(metaclass=ABCMeta):
 
                 for k, v in metrics.items():
                     average_meter_set.update(k, v)
-                description_metrics = ['NDCG@%d' % k for k in self.metric_ks[:3]] +\
+                description_metrics = ['NDCG@%d' % k for k in self.metric_ks[:3]] + \
                                       ['Recall@%d' % k for k in self.metric_ks[:3]]
                 description = 'Val: ' + ', '.join(s + ' {:.3f}' for s in description_metrics)
                 description = description.replace('NDCG', 'N').replace('Recall', 'R')
@@ -177,7 +177,8 @@ class AbstractTrainer(metaclass=ABCMeta):
         if args.optimizer.lower() == 'adam':
             return optim.Adam(self.model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
         elif args.optimizer.lower() == 'sgd':
-            return optim.SGD(self.model.parameters(), lr=args.lr, weight_decay=args.weight_decay, momentum=args.momentum)
+            return optim.SGD(self.model.parameters(), lr=args.lr, weight_decay=args.weight_decay,
+                             momentum=args.momentum)
         else:
             raise ValueError
 

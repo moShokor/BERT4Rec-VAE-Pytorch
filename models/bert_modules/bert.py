@@ -25,8 +25,8 @@ class BERT(nn.Module):
 
         # embedding for BERT, sum of positional, segment, token embeddings
         self.embedding = BERTEmbedding(vocab_size=vocab_size, embed_size=self.hidden, max_len=max_len, dropout=dropout)
-
-        self.combination_layer = combiners_factory(args.combination_type, extractors, self.hidden)
+        if extractors:
+            self.combination_layer = combiners_factory(args.combination_type, extractors, self.hidden)
 
         # multi-layers transformer blocks, deep network
         self.transformer_blocks = nn.ModuleList(
@@ -37,9 +37,9 @@ class BERT(nn.Module):
 
         # embedding the indexed sequence to sequence of vectors
         x = self.embedding(x)
-
-        # combining bert's embeddings with the external embeddings
-        x = self.combination_layer(x, additional)
+        if additional:
+            # combining bert's embeddings with the external embeddings
+            x = self.combination_layer(x, additional)
 
         # running over multiple transformer blocks
         for transformer in self.transformer_blocks:

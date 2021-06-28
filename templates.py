@@ -26,7 +26,7 @@ def baseline_template(args):
     args.test_negative_sample_size = 100
     args.test_negative_sampling_seed = 98765
     args.trainer_code = 'bert'
-    args.device = 'cuda'
+    args.device = 'cpu'
     args.num_gpu = 1
     args.device_idx = '0'
     args.optimizer = 'Adam'
@@ -68,6 +68,18 @@ def wiki2vec_training_template(args):
     args.wiki2vec_dimension = input('Input wiki2vec dimension (100,300,500) ')
     args.wiki2vec_model_type = input('Input wiki2vec dimension (NA, nolg_, win10_) ')
     args.combination_type = 'concat'
+
+
+def test_wiki2vec_template(args):
+    wiki2vec_training_template(args)
+    args.mode = 'test'
+    args.test_model_path = '/home/shokor/PycharmProjects/BERT4Rec-VAE-Pytorch/best_acc_model.pth'
+
+
+def test_baseline_template(args):
+    baseline_template(args)
+    args.mode = 'test'
+    args.test_model_path = '/home/shokor/PycharmProjects/BERT4Rec-VAE-Pytorch/best_acc_model.pth'
 
 
 def vae_given_beta_template(args):
@@ -199,6 +211,8 @@ TEMPLATES = {'train_bert_short': short_training_template,
              'train_dae': dae_template,
              'train_vae_search_beta': vae_search_beta_template,
              'train_vae_give_beta': vae_given_beta_template,
+             'test_wiki2vec_template': test_wiki2vec_template,
+             'test_baseline_template': test_baseline_template
              }
 
 
