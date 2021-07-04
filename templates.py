@@ -56,6 +56,11 @@ def baseline_template(args):
     args.bert_num_heads = 2
 
 
+def sparcified_training_template(args):
+    baseline_template(args)
+    args.items_sampling_ratio = input('remove the top popular items % (0.01, 0.02, 0.05, 0.1, 0.2) ')
+
+
 def short_training_template(args):
     baseline_template(args)
     args.num_epochs = 10
@@ -212,7 +217,8 @@ TEMPLATES = {'train_bert_short': short_training_template,
              'train_vae_search_beta': vae_search_beta_template,
              'train_vae_give_beta': vae_given_beta_template,
              'test_wiki2vec_template': test_wiki2vec_template,
-             'test_baseline_template': test_baseline_template
+             'test_baseline_template': test_baseline_template,
+             'sparcified_training_template': sparcified_training_template,
              }
 
 

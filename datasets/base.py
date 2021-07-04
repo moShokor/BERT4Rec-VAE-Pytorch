@@ -19,6 +19,7 @@ class AbstractDataset(Downloadable, metaclass=ABCMeta):
         self.min_sc = args.min_sc
         self.split = args.split
         self.additional_inputs_extractors = extractors
+        self.items_sampling_ratio = args.items_sampling_ratio
 
         assert self.min_uc >= 2, 'Need at least 2 ratings per user for validation and test'
 
@@ -54,6 +55,7 @@ class AbstractDataset(Downloadable, metaclass=ABCMeta):
         df = df.drop_duplicates(['uid', 'sid'])
         df = self.make_implicit(df)
         df = self.filter_triplets(df)
+        df = self.remove_popular_items(df)
         df, umap, smap = self.densify_index(df)
         # TODO you need to use the smap to correct the coresspondance in the rest of the code
         addmap = self.index_additional_inputs(sid2name, smap)
@@ -70,6 +72,20 @@ class AbstractDataset(Downloadable, metaclass=ABCMeta):
                    'addmap': addmap}
         with dataset_path.open('wb') as f:
             pickle.dump(dataset, f)
+
+    def remove_popular_items(self, df):
+        if self.items_sampling_ratio:
+            counts = df.groupby('sid').count()
+            length = int(self.items_sampling_ratio * sum(counts['uid']))
+            sids = counts.sort_values('uid', ascending=False).index
+            a = list(np.cumsum(counts['uid']) > length)
+            index = [i for i in range(1, len(a)) if a[i] != a[i - 1]][0]
+            ids = list(sids[:index])
+            res = df[~df.sid.isin(ids)]
+            print(f'removing the top {self.items_sampling_ratio} '
+                  f'most popular items new_length: {len(res)} '
+                  f'is {len(res) / len(df)} of the original length')
+        return df
 
     def index_additional_inputs(self, sid2name, smap):
         # translate the ids to correspond to the incremental ones in the smap
