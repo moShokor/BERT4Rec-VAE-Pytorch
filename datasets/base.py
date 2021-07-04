@@ -19,7 +19,7 @@ class AbstractDataset(Downloadable, metaclass=ABCMeta):
         self.min_sc = args.min_sc
         self.split = args.split
         self.additional_inputs_extractors = extractors
-        self.items_sampling_ratio = args.items_sampling_ratio
+        self.items_sampling_ratio = float(args.items_sampling_ratio)
 
         assert self.min_uc >= 2, 'Need at least 2 ratings per user for validation and test'
 

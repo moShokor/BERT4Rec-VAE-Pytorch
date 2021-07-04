@@ -56,11 +56,6 @@ def baseline_template(args):
     args.bert_num_heads = 2
 
 
-def sparcified_training_template(args):
-    baseline_template(args)
-    args.items_sampling_ratio = input('remove the top popular items % (0.01, 0.02, 0.05, 0.1, 0.2) ')
-
-
 def short_training_template(args):
     baseline_template(args)
     args.num_epochs = 10
@@ -73,6 +68,16 @@ def wiki2vec_training_template(args):
     args.wiki2vec_dimension = input('Input wiki2vec dimension (100,300,500) ')
     args.wiki2vec_model_type = input('Input wiki2vec dimension (NA, nolg_, win10_) ')
     args.combination_type = 'concat'
+
+
+def sparcified_training_template(args):
+    baseline_template(args)
+    args.items_sampling_ratio = input('remove the top popular items % (0.01, 0.02, 0.05, 0.1, 0.2) ')
+
+
+def sparcified_wiki2vec_template(args):
+    wiki2vec_training_template(args)
+    args.items_sampling_ratio = input('remove the top popular items % (0.01, 0.02, 0.05, 0.1, 0.2) ')
 
 
 def test_wiki2vec_template(args):
@@ -219,6 +224,7 @@ TEMPLATES = {'train_bert_short': short_training_template,
              'test_wiki2vec_template': test_wiki2vec_template,
              'test_baseline_template': test_baseline_template,
              'sparcified_training_template': sparcified_training_template,
+             'sparcified_wiki2vec_template': sparcified_wiki2vec_template
              }
 
 
