@@ -84,7 +84,8 @@ class AbstractDataset(Downloadable, metaclass=ABCMeta):
             res = df[~df.sid.isin(ids)]
             print(f'removing the top {self.items_sampling_ratio} '
                   f'most popular items new_length: {len(res)} '
-                  f'is {len(res) / len(df)} of the original length')
+                  f'is {len(res) / len(df):.3f} of the original length')
+            df = res
         return df
 
     def index_additional_inputs(self, sid2name, smap):
