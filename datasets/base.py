@@ -78,7 +78,8 @@ class AbstractDataset(Downloadable, metaclass=ABCMeta):
         if self.items_sampling_ratio:
             counts = df.groupby('sid').count()
             length = int(self.items_sampling_ratio * sum(counts['uid']))
-            sids = counts.sort_values('uid', ascending=False).index
+            counts = counts.sort_values('uid', ascending=False)
+            sids = counts.index
             a = list(np.cumsum(counts['uid']) > length)
             index = [i for i in range(1, len(a)) if a[i] != a[i - 1]][0]
             ids = list(sids[:index])
