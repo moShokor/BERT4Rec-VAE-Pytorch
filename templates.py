@@ -26,7 +26,7 @@ def baseline_template(args):
     args.test_negative_sample_size = 100
     args.test_negative_sampling_seed = 98765
     args.trainer_code = 'bert'
-    args.device = 'cpu'
+    args.device = 'cuda'
     args.num_gpu = 1
     args.device_idx = '0'
     args.optimizer = 'Adam'
@@ -83,6 +83,7 @@ def sparcified_wiki2vec_template(args):
 def test_wiki2vec_template(args):
     wiki2vec_training_template(args)
     args.mode = 'test'
+    args.device = 'cpu'
     args.test_model_path = '/home/shokor/PycharmProjects/BERT4Rec-VAE-Pytorch/best_acc_model.pth'
 
 
