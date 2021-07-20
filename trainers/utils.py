@@ -34,12 +34,13 @@ def recalls_and_ndcgs_for_ks(scores, labels, ks):
     labels_float = labels.float()
     rank = (-scores).argsort(dim=1)
     cut = rank
+    pure_res = {}
     for k in sorted(ks, reverse=True):
        cut = cut[:, :k]
        hits = labels_float.gather(1, cut)
        metrics['Recall@%d' % k] = \
            (hits.sum(1) / torch.min(torch.Tensor([k]).to(labels.device), labels.sum(1).float())).mean().cpu().item()
-
+       pure_res[k] = hits.sum(1)
        position = torch.arange(2, 2+k)
        weights = 1 / torch.log2(position.float())
        dcg = (hits * weights.to(hits.device)).sum(1)
@@ -47,4 +48,4 @@ def recalls_and_ndcgs_for_ks(scores, labels, ks):
        ndcg = (dcg / idcg).mean()
        metrics['NDCG@%d' % k] = ndcg.cpu().item()
 
-    return metrics
+    return metrics, pure_res

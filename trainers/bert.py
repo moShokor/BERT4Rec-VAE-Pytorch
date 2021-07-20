@@ -5,8 +5,8 @@ import torch.nn as nn
 
 
 class BERTTrainer(AbstractTrainer):
-    def __init__(self, args, model, train_loader, val_loader, test_loader, export_root):
-        super().__init__(args, model, train_loader, val_loader, test_loader, export_root)
+    def __init__(self, args, model, train_loader, val_loader, test_loader, export_root, smap):
+        super().__init__(args, model, train_loader, val_loader, test_loader, export_root, smap)
         self.ce = nn.CrossEntropyLoss(ignore_index=0)
 
     @classmethod
@@ -36,6 +36,7 @@ class BERTTrainer(AbstractTrainer):
         scores = self.model(seqs, additional)  # B x T x V
         scores = scores[:, -1, :]  # B x V
         scores = scores.gather(1, candidates)  # B x C
-
-        metrics = recalls_and_ndcgs_for_ks(scores, labels, self.metric_ks)
-        return metrics
+        y, indexes = (candidates * labels).max(1)
+        metrics, pure_res = recalls_and_ndcgs_for_ks(scores, labels, self.metric_ks)
+        h = {k:(res*y).tolist() for k, res in pure_res.items()}
+        return metrics, h, y.tolist()

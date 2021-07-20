@@ -1,3 +1,5 @@
+from sklearn.metrics import precision_recall_fscore_support
+
 from loggers import *
 from config import STATE_DICT_KEY, OPTIMIZER_STATE_DICT_KEY
 from utils import AverageMeterSet
@@ -7,6 +9,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
+import pandas as pd
 
 import json
 from abc import *
@@ -14,7 +17,8 @@ from pathlib import Path
 
 
 class AbstractTrainer(metaclass=ABCMeta):
-    def __init__(self, args, model, train_loader, val_loader, test_loader, export_root):
+    def __init__(self, args, model, train_loader, val_loader, test_loader, export_root, smap):
+        self.inv_smap = {v: k for k, v in smap.items()}
         self.args = args
         self.device = args.device
         self.model = model.to(self.device)
@@ -148,15 +152,20 @@ class AbstractTrainer(metaclass=ABCMeta):
         best_model = torch.load(model_path).get('model_state_dict')
         self.model.load_state_dict(best_model)
         self.model.eval()
+        self.model.to(self.device)
 
         average_meter_set = AverageMeterSet()
-
+        overall_h = {k: [] for k in self.metric_ks}
+        overall_y = []
         with torch.no_grad():
             tqdm_dataloader = tqdm(self.test_loader)
             for batch_idx, batch in enumerate(tqdm_dataloader):
                 batch = [x.to(self.device) for x in batch]
 
-                metrics = self.calculate_metrics(batch)
+                metrics, batch_h, batch_y = self.calculate_metrics(batch)
+                for k, v in batch_h.items():
+                    overall_h[k] += [self.inv_smap[el] if el else -1 for el in v]
+                overall_y += [self.inv_smap[el] for el in batch_y]
 
                 for k, v in metrics.items():
                     average_meter_set.update(k, v)
@@ -170,6 +179,13 @@ class AbstractTrainer(metaclass=ABCMeta):
             average_metrics = average_meter_set.averages()
             with open(os.path.join(self.export_root, 'logs', 'test_metrics.json'), 'w') as f:
                 json.dump(average_metrics, f, indent=4)
+
+            # saving the pre-class accuracies
+            labels = sorted(list(set(overall_y)))
+            for k, v in overall_h.items():
+                p, r, f1, s = precision_recall_fscore_support(overall_y, v, labels=labels)
+                df = pd.DataFrame(list(zip(labels, p, r, f1, s)), columns=['labels', 'p', 'r', 'f1', 'support'])
+                df.to_csv(os.path.join(self.export_root, 'logs', f'class_metrics_k:{k}.csv'), index=False)
             print(average_metrics)
 
     def _create_optimizer(self):

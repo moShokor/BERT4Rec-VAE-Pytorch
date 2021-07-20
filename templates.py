@@ -90,6 +90,7 @@ def test_wiki2vec_template(args):
 def test_baseline_template(args):
     baseline_template(args)
     args.mode = 'test'
+    args.device = 'cpu'
     args.test_model_path = '/home/shokor/PycharmProjects/BERT4Rec-VAE-Pytorch/best_acc_model.pth'
 
 

@@ -11,9 +11,9 @@ def prepare():
     export_root = setup_train(args)
     extractors = extractors_factory(args)
     dataset = dataset_factory(args, extractors)
-    train_loader, val_loader, test_loader = dataloader_factory(args, dataset, extractors)
+    train_loader, val_loader, test_loader, smap = dataloader_factory(args, dataset, extractors)
     model = model_factory(args, extractors)
-    trainer = trainer_factory(args, model, train_loader, val_loader, test_loader, export_root)
+    trainer = trainer_factory(args, model, train_loader, val_loader, test_loader, export_root, smap)
     return trainer
 
 
