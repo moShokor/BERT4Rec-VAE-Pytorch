@@ -84,14 +84,14 @@ def test_wiki2vec_template(args):
     wiki2vec_training_template(args)
     args.mode = 'test'
     args.device = 'cpu'
-    args.test_model_path = '/home/shokor/PycharmProjects/BERT4Rec-VAE-Pytorch/best_acc_model.pth'
+    args.test_model_path = './best_acc_model.pth'
 
 
 def test_baseline_template(args):
     baseline_template(args)
     args.mode = 'test'
     args.device = 'cpu'
-    args.test_model_path = '/home/shokor/PycharmProjects/BERT4Rec-VAE-Pytorch/best_acc_model.pth'
+    args.test_model_path = './best_acc_model.pth'
 
 
 def vae_given_beta_template(args):
