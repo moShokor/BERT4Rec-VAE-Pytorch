@@ -1,7 +1,9 @@
 from .wiki2vec import Wiki2VecExtractor
+from .node2vec import Node2VecExtractor
 
 EXTRACTORS = {
     Wiki2VecExtractor.code(): Wiki2VecExtractor,
+    Node2VecExtractor.code():Node2VecExtractor
 }
 
 

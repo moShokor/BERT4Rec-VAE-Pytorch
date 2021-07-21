@@ -1,5 +1,5 @@
 import pandas as pd
-
+import pickle as pk
 from .base import AbstractDataset
 
 
@@ -36,3 +36,8 @@ class ML1MDataset(AbstractDataset):
         df = pd.read_csv(file_path, sep='::', header=None)
         df.columns = ['sid', 'name', 'tags']
         return dict(zip(df.sid, df.name))
+
+    def get_sid2id(self):
+        with open('./ml-1m-Links.pk', 'rb') as f:
+            id2imdbId = pk.load(f)
+        return id2imdbId

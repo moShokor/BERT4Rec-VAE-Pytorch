@@ -3,6 +3,8 @@ from collections import defaultdict
 import numpy as np
 from tqdm import tqdm
 
+from features_extractors import Wiki2VecExtractor
+from features_extractors.node2vec import Node2VecExtractor
 from .downloadable import Downloadable
 
 tqdm.pandas()
@@ -36,6 +38,10 @@ class AbstractDataset(Downloadable, metaclass=ABCMeta):
     def get_sid2name(self):
         pass
 
+    @abstractmethod
+    def get_sid2id(self):
+        pass
+
     def load_dataset(self):
         self.preprocess()
         dataset_path = self._get_preprocessed_dataset_path()
@@ -52,6 +58,7 @@ class AbstractDataset(Downloadable, metaclass=ABCMeta):
         self.maybe_download_raw_asset()
         df = self.load_ratings_df()
         sid2name = self.get_sid2name()
+        sid2id = self.get_sid2id()
         # TODO note I added this one to remove duplicates just in case
         df = df.drop_duplicates(['uid', 'sid'])
         df = self.make_implicit(df)
@@ -59,7 +66,7 @@ class AbstractDataset(Downloadable, metaclass=ABCMeta):
         df = self.remove_popular_items(df)
         df, umap, smap = self.densify_index(df)
         # TODO you need to use the smap to correct the coresspondance in the rest of the code
-        addmap = self.index_additional_inputs(sid2name, smap)
+        addmap = self.index_additional_inputs(sid2name, sid2id,  smap)
         # train, val, test, train_add, val_add, test_add = self.split_df(df, len(umap))
         train, val, test = self.split_df(df, len(umap))
         dataset = {'train': train,
@@ -90,13 +97,18 @@ class AbstractDataset(Downloadable, metaclass=ABCMeta):
             df = res
         return df
 
-    def index_additional_inputs(self, sid2name, smap):
+    def index_additional_inputs(self, sid2name, sid2id, smap):
         # translate the ids to correspond to the incremental ones in the smap
         sid2name = {smap[sid]: name for sid, name in sid2name.items() if sid in smap}
+        # do the same for the Ids e.g. the ImbdId
+        sid2id = {smap[sid]: id for sid, id in sid2id.items() if sid in smap}
         # then use the sid2name to get the correspondence from each of the extractors
         sid2add = defaultdict(dict)
         for code, extractor in self.additional_inputs_extractors.items():
-            sid2add[code] = extractor.build_correspondence(sid2name)
+            if isinstance(extractor, Wiki2VecExtractor):
+                sid2add[code] = extractor.build_correspondence(sid2name)
+            elif isinstance(extractor, Node2VecExtractor):
+                sid2add[code] = extractor.build_correspondence(sid2id)
         return sid2add
 
     def make_implicit(self, df):
