@@ -1,7 +1,6 @@
 import pandas as pd
-import pickle as pk
 from .base import AbstractDataset
-
+import pickle5 as pk
 
 class ML1MDataset(AbstractDataset):
     @classmethod

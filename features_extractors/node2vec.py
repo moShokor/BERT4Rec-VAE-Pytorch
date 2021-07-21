@@ -1,10 +1,9 @@
-import pickle as pk
-
 import numpy as np
 import torch
 from tqdm import tqdm
 
 from features_extractors.base import AbstractExtractor
+import pickle5 as pk
 
 
 class Node2VecExtractor(AbstractExtractor):
