@@ -53,7 +53,7 @@ parser.add_argument('--train_batch_size', type=int, default=64)
 parser.add_argument('--val_batch_size', type=int, default=64)
 parser.add_argument('--test_batch_size', type=int, default=64)
 parser.add_argument('--items_sampling_ratio', type=float, default=None,
-                    choices=[0.01, 0.02, 0.05, 0.1, 0.2])
+                    choices=[0.01, 0.02, 0.05, 0.1, 0.2, 0.5])
 ################
 # NegativeSampler
 ################

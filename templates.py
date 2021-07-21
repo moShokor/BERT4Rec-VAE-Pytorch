@@ -72,12 +72,12 @@ def wiki2vec_training_template(args):
 
 def sparcified_training_template(args):
     baseline_template(args)
-    args.items_sampling_ratio = input('remove the top popular items % (0.01, 0.02, 0.05, 0.1, 0.2) ')
+    args.items_sampling_ratio = input('remove the top popular items % (0.01, 0.02, 0.05, 0.1, 0.2, 0.5) ')
 
 
 def sparcified_wiki2vec_template(args):
     wiki2vec_training_template(args)
-    args.items_sampling_ratio = input('remove the top popular items % (0.01, 0.02, 0.05, 0.1, 0.2) ')
+    args.items_sampling_ratio = input('remove the top popular items % (0.01, 0.02, 0.05, 0.1, 0.2, 0.5) ')
 
 
 def test_wiki2vec_template(args):
