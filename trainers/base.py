@@ -126,7 +126,7 @@ class AbstractTrainer(metaclass=ABCMeta):
             for batch_idx, batch in enumerate(tqdm_dataloader):
                 batch = [x.to(self.device) for x in batch]
 
-                metrics = self.calculate_metrics(batch)
+                metrics, h, y = self.calculate_metrics(batch)
 
                 for k, v in metrics.items():
                     average_meter_set.update(k, v)
