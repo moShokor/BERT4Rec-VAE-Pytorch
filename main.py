@@ -5,7 +5,6 @@ from models import model_factory
 from options import args
 from trainers import trainer_factory
 from utils import *
-import pickle5 as pickle
 
 
 def prepare():
