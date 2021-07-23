@@ -13,7 +13,10 @@ class Node2VecExtractor(AbstractExtractor):
         file_path = self.get_raw_model_path()
         with open(file_path, 'rb') as f:
             self.model = pk.load(f)
-        self.s = self.model.syn1
+        try:
+            self.s = self.model.syn1
+        except:
+            self.s = self.model.syn1neg
         self.s = np.concatenate([self.s, np.zeros((1, self.s.shape[-1]))])
         self.s = torch.from_numpy(self.s).float()
         self.zeroth_index = len(self.s) - 1
