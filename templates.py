@@ -262,11 +262,11 @@ TEMPLATES = {'train_bert_short': short_training_template,
              'test_baseline_template': test_baseline_template,
              'test_wiki2vec_template': test_wiki2vec_template,
              'test_node2vec_template': test_node2vec_template,
-             'test_node_plus_wiki2vec_template': node_plus_wiki2vec_testing_template,
+             'test_node_plus_wiki2vec_template': test_node_plus_wiki2vec_template,
              'sparcified_training_template': sparcified_training_template,
              'sparcified_wiki2vec_template': sparcified_wiki2vec_template,
              'sparcified_node2vec_template': sparcified_node2vec_template,
-             'sparcified_node_plus_wiki2vec_template': node_plus_wiki2vec_sparcified_training_template
+             'sparcified_node_plus_wiki2vec_template': sparcified_node_plus_wiki2vec_template
              }
 
 
