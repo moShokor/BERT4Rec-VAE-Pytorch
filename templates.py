@@ -113,7 +113,7 @@ def test_node2vec_template(args):
 
 def node_plus_wiki2vec_training_template(args):
     baseline_template(args)
-    args.additional_inputs = ['node2vec', 'wiki2vec]
+    args.additional_inputs = ['node2vec', 'wiki2vec']
     args.combination_type = 'concat'
 
 
