@@ -111,6 +111,22 @@ def test_node2vec_template(args):
     args.device = 'cpu'
     args.test_model_path = './best_acc_model.pth'
 
+def node_plus_wiki2vec_training_template(args):
+    baseline_template(args)
+    args.additional_inputs = ['node2vec', 'wiki2vec]
+    args.combination_type = 'concat'
+
+
+def sparcified_node_plus_wiki2vec_template(args):
+    node_plus_wiki2vec_training_template(args)
+    args.items_sampling_ratio = input('remove the top popular items % (0.01, 0.02, 0.05, 0.1, 0.2, 0.5) ')
+
+
+def test_node_plus_wiki2vec_template(args):
+    node_plus_wiki2vec_training_template(args)
+    args.mode = 'test'
+    args.device = 'cpu'
+    args.test_model_path = './best_acc_model.pth'
 
 def vae_given_beta_template(args):
     args.mode = 'train'
@@ -239,15 +255,18 @@ TEMPLATES = {'train_bert_short': short_training_template,
              'train_bert': baseline_template,
              'train_bert_wiki2vec': wiki2vec_training_template,
              'train_bert_node2vec': node2vec_training_template,
+             'train_bert_node_plus_wiki2vec': node_plus_wiki2vec_training_template,
              'train_dae': dae_template,
              'train_vae_search_beta': vae_search_beta_template,
              'train_vae_give_beta': vae_given_beta_template,
              'test_baseline_template': test_baseline_template,
              'test_wiki2vec_template': test_wiki2vec_template,
              'test_node2vec_template': test_node2vec_template,
+             'test_node_plus_wiki2vec_template': node_plus_wiki2vec_testing_template,
              'sparcified_training_template': sparcified_training_template,
              'sparcified_wiki2vec_template': sparcified_wiki2vec_template,
-             'sparcified_node2vec_template': sparcified_node2vec_template
+             'sparcified_node2vec_template': sparcified_node2vec_template,
+             'sparcified_node_plus_wiki2vec_template': node_plus_wiki2vec_sparcified_training_template
              }
 
 
