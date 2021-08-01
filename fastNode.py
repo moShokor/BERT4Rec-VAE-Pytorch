@@ -6,6 +6,7 @@ with open('./graph.pk', 'rb') as f:
 
 train = True
 
+
 if train:
 
     # training undirected

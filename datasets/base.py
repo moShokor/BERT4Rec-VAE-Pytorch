@@ -4,6 +4,7 @@ import numpy as np
 from tqdm import tqdm
 
 from features_extractors import Wiki2VecExtractor
+from features_extractors.fasttext import FastTextExtractor
 from features_extractors.node2vec import Node2VecExtractor
 from .downloadable import Downloadable
 
@@ -109,6 +110,8 @@ class AbstractDataset(Downloadable, metaclass=ABCMeta):
                 sid2add[code] = extractor.build_correspondence(sid2name)
             elif isinstance(extractor, Node2VecExtractor):
                 sid2add[code] = extractor.build_correspondence(sid2id)
+            elif isinstance(extractor, FastTextExtractor):
+                sid2add[code] = extractor.build_correspondence()
         return sid2add
 
     def make_implicit(self, df):

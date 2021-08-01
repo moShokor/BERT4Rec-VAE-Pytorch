@@ -1,5 +1,4 @@
-# TODO make sure to update the templates using the updated options from options.py
-#  to include the information of the wiki2vec
+# TODO refactor this for the case of multiple extractors instead of explicitly writing each variant
 
 
 def baseline_template(args):
@@ -111,22 +110,43 @@ def test_node2vec_template(args):
     args.device = 'cpu'
     args.test_model_path = './best_acc_model.pth'
 
-def node_plus_wiki2vec_training_template(args):
+
+def fast_text_training_template(args):
     baseline_template(args)
-    args.additional_inputs = ['node2vec', 'wiki2vec']
+    args.additional_inputs = ['fasttext']
     args.combination_type = 'concat'
 
 
-def sparcified_node_plus_wiki2vec_template(args):
-    node_plus_wiki2vec_training_template(args)
+def sparcified_fast_text_template(args):
+    fast_text_training_template(args)
     args.items_sampling_ratio = input('remove the top popular items % (0.01, 0.02, 0.05, 0.1, 0.2, 0.5) ')
 
 
-def test_node_plus_wiki2vec_template(args):
-    node_plus_wiki2vec_training_template(args)
+def test_fast_text_template(args):
+    fast_text_training_template(args)
     args.mode = 'test'
     args.device = 'cpu'
     args.test_model_path = './best_acc_model.pth'
+
+
+def multi_extractors_training_template(args):
+    baseline_template(args)
+    args.additional_inputs = input('select one or more of the following options (wiki2vec, node2vec, fasttext)'
+                                   ' seperated by one space').split()
+    args.combination_type = 'concat'
+
+
+def sparcified_multi_extractor_template(args):
+    multi_extractors_training_template(args)
+    args.items_sampling_ratio = input('remove the top popular items % (0.01, 0.02, 0.05, 0.1, 0.2, 0.5) ')
+
+
+def test_multi_extractor_template(args):
+    multi_extractors_training_template(args)
+    args.mode = 'test'
+    args.device = 'cpu'
+    args.test_model_path = './best_acc_model.pth'
+
 
 def vae_given_beta_template(args):
     args.mode = 'train'
@@ -232,41 +252,25 @@ def dae_template(args):
     args.dae_dropout = 0.5
 
 
-# def set_template(args):
-#     if args.template is None:
-#         return
-#     elif args.template.startswith('train_bert_short'):
-#         short_training_template(args)
-#
-#     elif args.template.startswith('train_bert'):
-#         baseline_template(args)
-#
-#     elif args.template.startswith('train_dae'):
-#         dae_template(args)
-#
-#     elif args.template.startswith('train_vae_search_beta'):
-#         vae_search_beta_template(args)
-#
-#     elif args.template.startswith('train_vae_give_beta'):
-#         vae_given_beta_template(args)
-
-
 TEMPLATES = {'train_bert_short': short_training_template,
              'train_bert': baseline_template,
              'train_bert_wiki2vec': wiki2vec_training_template,
              'train_bert_node2vec': node2vec_training_template,
-             'train_bert_node_plus_wiki2vec': node_plus_wiki2vec_training_template,
+             'train_bert_fasttext': fast_text_training_template,
+             'train_bert_multi_extractor': multi_extractors_training_template,
              'train_dae': dae_template,
              'train_vae_search_beta': vae_search_beta_template,
              'train_vae_give_beta': vae_given_beta_template,
              'test_baseline_template': test_baseline_template,
              'test_wiki2vec_template': test_wiki2vec_template,
              'test_node2vec_template': test_node2vec_template,
-             'test_node_plus_wiki2vec_template': test_node_plus_wiki2vec_template,
+             'test_fasttext_template': test_fast_text_template,
+             'test_multi_extractor_template': test_multi_extractor_template,
              'sparcified_training_template': sparcified_training_template,
              'sparcified_wiki2vec_template': sparcified_wiki2vec_template,
              'sparcified_node2vec_template': sparcified_node2vec_template,
-             'sparcified_node_plus_wiki2vec_template': sparcified_node_plus_wiki2vec_template
+             'sparcified_fast_text_template': sparcified_fast_text_template,
+             'sparcified_multi_extractor_template': sparcified_multi_extractor_template
              }
 
 
